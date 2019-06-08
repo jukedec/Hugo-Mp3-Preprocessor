@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"path/filepath"
@@ -18,6 +19,9 @@ import (
 )
 
 // import "fmt"
+
+var artistName []string
+var n = "\n"
 
 func main() {
 	fmt.Printf("hello, world\n")
@@ -36,20 +40,42 @@ func main() {
 	var files []string
 
 	// root, err := filepath.Abs(filepath.Dir(os.Args[0])) // filepath.Dir(os.Args[0])
-	dir, err := os.Getwd()
+	dir, err := os.Executable()
+	dir = filepath.Dir(dir)
 	check(err)
+	fmt.Printf("GETTING FILES IN DIR:\n")
 	fmt.Printf(dir)
+	fmt.Printf("\n")
+
+	// os.Exit(1)
 
 	pathErr := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
 		files = append(files, path)
 		return nil
 	})
 	check(pathErr)
+	// folderPath := dir + "/band/static/"
+	folderPath := filepath.Join(dir, "/static/")
+
+	fmt.Println("Making directory: " + folderPath)
+	os.MkdirAll(folderPath, os.ModePerm)
 	for _, file := range files {
 		fmt.Println(file)
 		fmt.Println(reflect.TypeOf(file).String())
+		last3 := file[len(file)-4:]
+		if strings.ToLower(last3) != ".mp3" {
+			// fmt.Printf("\n")
+			fmt.Println("GETTING SOMETHING WEIRD NOT MP3")
 
-		makeMd(file)
+		} else {
+			makeMd(file)
+			makeConfig()
+			origFileSlice := strings.Split(file, "/")
+			origFileName := origFileSlice[len(origFileSlice)-1]
+			var staticDir = filepath.Join(folderPath, origFileName)
+			copy(file, staticDir)
+		}
+
 	}
 
 	// fmt.Printf(mp3File.Title())
@@ -72,13 +98,9 @@ func check(e error) {
 
 func makeMd(f string) bool {
 
-	last3 := f[len(f)-4:]
-	if string(last3) != ".mp3" {
-		return false
-	}
-
 	mp3File, err := id3.Open(f)
 	var mp3Title = mp3File.Title()
+	artistName = append(artistName, mp3File.Artist())
 	fmt.Printf(mp3Title)
 
 	if err != nil {
@@ -102,6 +124,7 @@ func makeMd(f string) bool {
 
 	origFileSlice := strings.Split(f, "/")
 	origFileName := origFileSlice[len(origFileSlice)-1]
+	// origFileName = "/" + origFileName
 	fmt.Printf(origFileName)
 
 	// date := mp3YearStripped
@@ -117,7 +140,7 @@ func makeMd(f string) bool {
 	// check(err)
 	// defer f.Close()
 	var output bytes.Buffer
-	var n = "\n"
+
 	output.WriteString("---")
 	output.WriteString(n)
 	output.WriteString("title: ")
@@ -149,4 +172,48 @@ func makeMd(f string) bool {
 	writeErr := ioutil.WriteFile(mdFile, output.Bytes(), 0644)
 	check(writeErr)
 	return true
+}
+
+func copy(src, dst string) (int64, error) {
+	fmt.Println(n + "Moving file to " + dst)
+	sourceFileStat, err := os.Stat(src)
+	if err != nil {
+		return 0, err
+	}
+
+	if !sourceFileStat.Mode().IsRegular() {
+		return 0, fmt.Errorf("%s is not a regular file", src)
+	}
+
+	source, err := os.Open(src)
+	if err != nil {
+		return 0, err
+	}
+	defer source.Close()
+
+	destination, err := os.Create(dst)
+	if err != nil {
+		return 0, err
+	}
+	defer destination.Close()
+	nBytes, err := io.Copy(destination, source)
+	return nBytes, err
+}
+
+func makeConfig() {
+	var output bytes.Buffer
+
+	fileReg, err := regexp.Compile("[^a-zA-Z0-9]+")
+	check(err)
+	name := fileReg.ReplaceAllString(artistName[0], "")
+	githubPage := "http://frigginglorious.github.io/" + name
+	output.WriteString("baseURL = \"" + githubPage + "\"" + n)
+	output.WriteString("languageCode = \"en-us\"" + n)
+	output.WriteString("title = \"" + artistName[0] + "\"" + n)
+	output.WriteString("theme = \"hyde\"" + n)
+	output.WriteString("style = \"default\"" + n)
+
+	configFile := "config.toml"
+	writeErr := ioutil.WriteFile(configFile, output.Bytes(), 0644)
+	check(writeErr)
 }
