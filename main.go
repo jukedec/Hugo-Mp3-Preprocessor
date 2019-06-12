@@ -24,7 +24,16 @@ var artistName []string
 var n = "\n"
 
 func main() {
+
+	argsWithProg := os.Args
+	argsWithoutProg := os.Args[1:]
+
+	// arg := os.Args[3]
+
 	fmt.Printf("hello, world\n")
+	fmt.Println(argsWithProg)
+	fmt.Println(argsWithoutProg)
+	// fmt.Println(arg)
 
 	// fixUtf := func(r rune) rune {
 	// 	if r == utf8.RuneError { // && r != ' '
