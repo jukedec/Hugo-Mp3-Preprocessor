@@ -3,6 +3,8 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"image"
+	"image/jpeg"
 	"io"
 	"log"
 	"os"
@@ -13,26 +15,42 @@ import (
 
 	id3 "github.com/mikkyang/id3-go"
 
+	"github.com/dhowden/tag"
+
 	// utf32 "golang.org/x/text/encoding/unicode/utf32"
 
 	"io/ioutil"
 )
 
+// import "github.com/dhowden/tag"
+
 // import "fmt"
 
 var artistName []string
 var n = "\n"
+var githubPage = ""
 
 func main() {
 
-	argsWithProg := os.Args
 	argsWithoutProg := os.Args[1:]
 
 	// arg := os.Args[3]
 
+	// siteName := os.Args[3]
+
 	fmt.Printf("hello, world\n")
-	fmt.Println(argsWithProg)
+
 	fmt.Println(argsWithoutProg)
+
+	dir, err := os.Executable()
+	dir = filepath.Dir(dir)
+
+	//TODO: figure out how to send files with second param
+	// siteDir := ""
+	if len(argsWithoutProg) > 0 {
+		dir = argsWithoutProg[0]
+		// siteDir = argsWithoutProg[1]
+	}
 	// fmt.Println(arg)
 
 	// fixUtf := func(r rune) rune {
@@ -49,8 +67,7 @@ func main() {
 	var files []string
 
 	// root, err := filepath.Abs(filepath.Dir(os.Args[0])) // filepath.Dir(os.Args[0])
-	dir, err := os.Executable()
-	dir = filepath.Dir(dir)
+
 	check(err)
 	fmt.Printf("GETTING FILES IN DIR:\n")
 	fmt.Printf(dir)
@@ -77,14 +94,17 @@ func main() {
 			fmt.Println("GETTING SOMETHING WEIRD NOT MP3")
 
 		} else {
-			makeMd(file)
-			makeConfig()
+
 			origFileSlice := strings.Split(file, "/")
 			origFileName := origFileSlice[len(origFileSlice)-1]
 			var staticDir = filepath.Join(folderPath, origFileName)
-			copy(file, staticDir)
-		}
+			artistName := makeMd(file, dir, folderPath)
+			fmt.Println("SETTING TO ARTIST: " + artistName)
 
+			copy(file, staticDir)
+
+			makeConfig(dir)
+		}
 	}
 
 	// fmt.Printf(mp3File.Title())
@@ -105,8 +125,8 @@ func check(e error) {
 	}
 }
 
-func makeMd(f string) bool {
-
+func makeMd(f string, dir string, staticDir string) string {
+	fmt.Printf("MAKING MD:\n")
 	mp3File, err := id3.Open(f)
 	var mp3Title = mp3File.Title()
 	artistName = append(artistName, mp3File.Artist())
@@ -130,7 +150,9 @@ func makeMd(f string) bool {
 	)
 
 	mdFile := fileReg.ReplaceAllString(mp3Title, "") + ".md"
-
+	mdPath := filepath.Join(dir, "content/posts")
+	os.MkdirAll(mdPath, os.ModePerm)
+	mdPath = filepath.Join(mdPath, mdFile)
 	origFileSlice := strings.Split(f, "/")
 	origFileName := origFileSlice[len(origFileSlice)-1]
 	// origFileName = "/" + origFileName
@@ -172,15 +194,21 @@ func makeMd(f string) bool {
 	output.WriteString("<audio controls>")
 
 	output.WriteString("<source src='")
-	output.WriteString(origFileName)
+	output.WriteString(filepath.Join(githubPage, origFileName))
 	output.WriteString("'  type='audio/mpeg'>")
 	output.WriteString(n)
 	output.WriteString("</audio>")
 	output.WriteString(n)
 
-	writeErr := ioutil.WriteFile(mdFile, output.Bytes(), 0644)
+	fmt.Println(n + "md files are being saved to: " + mdPath)
+	writeErr := ioutil.WriteFile(mdPath, output.Bytes(), 0644)
 	check(writeErr)
-	return true
+
+	getImg(f, staticDir)
+
+	// reflect.TypeOf()
+
+	return mp3File.Artist()
 }
 
 func copy(src, dst string) (int64, error) {
@@ -209,20 +237,54 @@ func copy(src, dst string) (int64, error) {
 	return nBytes, err
 }
 
-func makeConfig() {
+func makeConfig(dir string) {
 	var output bytes.Buffer
 
+	//Remove because I haven't figured out solid deploy yet.
 	fileReg, err := regexp.Compile("[^a-zA-Z0-9]+")
 	check(err)
 	name := fileReg.ReplaceAllString(artistName[0], "")
-	githubPage := "http://frigginglorious.github.io/" + name
-	output.WriteString("baseURL = \"" + githubPage + "\"" + n)
-	output.WriteString("languageCode = \"en-us\"" + n)
-	output.WriteString("title = \"" + artistName[0] + "\"" + n)
-	output.WriteString("theme = \"hyde\"" + n)
-	output.WriteString("style = \"default\"" + n)
+	reg, err := regexp.Compile("[^ -~]+")
+	check(err)
+	nameStripped := reg.ReplaceAllString(name, "")
+	// nameStripped := "musicMonth"
+	fmt.Println(nameStripped)
 
-	configFile := "config.toml"
+	githubPage = "http://frigginglorious.github.io/" + nameStripped
+	output.WriteString("baseURL = \"" + githubPage + "/\"" + n)
+	output.WriteString("languageCode = \"en-us\"" + n)
+	output.WriteString("title = \"" + nameStripped + "\"" + n)
+	output.WriteString("theme = \"hyde-hyde\"" + n)
+	output.WriteString("style = \"default\"" + n)
+	output.WriteString("[params]" + n + "authorimage = \"cover.jpg\"")
+
+	configFile := filepath.Join(dir, "config.toml")
 	writeErr := ioutil.WriteFile(configFile, output.Bytes(), 0644)
 	check(writeErr)
+}
+
+func getImg(f string, staticDir string) {
+
+	readFile, err := os.Open(f)
+	check(err)
+	m, err := tag.ReadFrom(readFile)
+	check(err)
+	fmt.Println("ID3 Tag Title?:")
+	fmt.Println(m.Title())
+	fmt.Println(reflect.TypeOf(m.Picture().Data))
+
+	img, _, _ := image.Decode(bytes.NewReader(m.Picture().Data))
+
+	var opt jpeg.Options
+
+	opt.Quality = 80
+	// ok, write out the data into the new JPEG file
+
+	out, err := os.Create(staticDir + "/cover.jpg")
+	check(err)
+	err = jpeg.Encode(out, img, &opt)
+
+	log.Print(m.Format()) // The detected format.
+	log.Print(m.Title())  // The title of the track (see Metadata interface for more details).
+
 }
