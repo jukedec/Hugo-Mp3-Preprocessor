@@ -42,15 +42,35 @@ func main() {
 
 	fmt.Println(argsWithoutProg)
 
-	dir, err := os.Executable()
-	dir = filepath.Dir(dir)
+	baseDir, err := os.Executable()
+	baseDir = baseDir + "/"
+	// pushDir, err := os.Executable()
 
 	//TODO: figure out how to send files with second param
 	// siteDir := ""
-	if len(argsWithoutProg) > 0 {
-		dir = argsWithoutProg[0]
-		// siteDir = argsWithoutProg[1]
-	}
+	// if len(argsWithoutProg) > 2 {
+	// dir := argsWithoutProg[1]
+	// siteDir = argsWithoutProg[1]
+	// }
+
+	// pushDir := argsWithoutProg[0]
+
+	fmt.Println("Push dir and Origin Dir:")
+	// fmt.Println(baseDir + argsWithoutProg[0])
+	// fmt.Println(baseDir + argsWithoutProg[1])
+
+	// pushDir := filepath.Dir(argsWithoutProg[0])
+	// dir := filepath.Dir(argsWithoutProg[1])
+
+	pushDir := filepath.Clean(argsWithoutProg[0])
+	dir := filepath.Clean(argsWithoutProg[1])
+
+	// pushDir := baseDir + argsWithoutProg[0]
+	// dir := baseDir + argsWithoutProg[1]
+
+	fmt.Println("FILEPATH SET AS: Push dir and Origin Dir:")
+	fmt.Println(pushDir)
+	fmt.Println(dir)
 	// fmt.Println(arg)
 
 	// fixUtf := func(r rune) rune {
@@ -81,29 +101,30 @@ func main() {
 	})
 	check(pathErr)
 	// folderPath := dir + "/band/static/"
-	folderPath := filepath.Join(dir, "/static/")
+	folderPath := filepath.Join(pushDir, "/static/")
 
 	fmt.Println("Making directory: " + folderPath)
 	os.MkdirAll(folderPath, os.ModePerm)
+
 	for _, file := range files {
 		fmt.Println(file)
 		fmt.Println(reflect.TypeOf(file).String())
 		last3 := file[len(file)-4:]
 		if strings.ToLower(last3) != ".mp3" {
 			// fmt.Printf("\n")
-			fmt.Println("GETTING SOMETHING WEIRD NOT MP3")
+			fmt.Println("GETTING SOMETHING WEIRD NOT MP3 for: " + file)
 
 		} else {
 
 			origFileSlice := strings.Split(file, "/")
 			origFileName := origFileSlice[len(origFileSlice)-1]
 			var staticDir = filepath.Join(folderPath, origFileName)
-			artistName := makeMd(file, dir, folderPath)
-			fmt.Println("SETTING TO ARTIST: " + artistName)
+			artistName := makeMd(file, pushDir, folderPath)
+			fmt.Println("SETTING TO ARTIST: " + artistName + "/n")
 
 			copy(file, staticDir)
 
-			makeConfig(dir)
+			makeConfig(pushDir)
 		}
 	}
 
@@ -125,12 +146,22 @@ func check(e error) {
 	}
 }
 
+func getBaseSiteName(artistName string) string {
+	fileReg, err := regexp.Compile("[^a-zA-Z0-9]+")
+	check(err)
+	name := fileReg.ReplaceAllString(artistName, "")
+	reg, err := regexp.Compile("[^ -~]+")
+	check(err)
+	nameStripped := reg.ReplaceAllString(name, "")
+	return nameStripped
+}
+
 func makeMd(f string, dir string, staticDir string) string {
-	fmt.Printf("MAKING MD:\n")
+	fmt.Printf("MAKING MD from:" + f + "\n")
 	mp3File, err := id3.Open(f)
 	var mp3Title = mp3File.Title()
 	artistName = append(artistName, mp3File.Artist())
-	fmt.Printf(mp3Title)
+	fmt.Printf("mp3Title: " + mp3Title + "\n")
 
 	if err != nil {
 		log.Fatal(err)
@@ -144,19 +175,29 @@ func makeMd(f string, dir string, staticDir string) string {
 	mp3TitleStripped := reg.ReplaceAllString(mp3Title, "")
 	mp3YearStripped := reg.ReplaceAllString(mp3File.Year(), "")
 
+	fmt.Printf("mp3TitleStripped: " + mp3TitleStripped + "\n")
+
 	const (
 		layoutISO = "2006"
 		layoutUS  = "January 2, 2006"
 	)
 
+	fmt.Printf("staticDir: " + staticDir + "\n")
+	fmt.Printf("dir: " + dir + "\n")
+
 	mdFile := fileReg.ReplaceAllString(mp3Title, "") + ".md"
 	mdPath := filepath.Join(dir, "content/posts")
 	os.MkdirAll(mdPath, os.ModePerm)
+	fmt.Printf("FILE IS: " + mdFile + "\n")
+
 	mdPath = filepath.Join(mdPath, mdFile)
 	origFileSlice := strings.Split(f, "/")
 	origFileName := origFileSlice[len(origFileSlice)-1]
 	// origFileName = "/" + origFileName
-	fmt.Printf(origFileName)
+	fmt.Printf("origFileName: " + origFileName + "\n")
+
+	mp3Source := "/" + getBaseSiteName(mp3File.Artist()) + "/" + origFileName
+	fmt.Printf("mp3Source: " + mp3Source + "\n")
 
 	// date := mp3YearStripped
 	// t, _ := time.Parse(layoutISO, date)
@@ -194,7 +235,10 @@ func makeMd(f string, dir string, staticDir string) string {
 	output.WriteString("<audio controls>")
 
 	output.WriteString("<source src='")
-	output.WriteString(filepath.Join(githubPage, origFileName))
+
+	// mp3Source := filepath.Join(githubPage, origFileName)
+
+	output.WriteString(mp3Source)
 	output.WriteString("'  type='audio/mpeg'>")
 	output.WriteString(n)
 	output.WriteString("</audio>")
@@ -250,15 +294,24 @@ func makeConfig(dir string) {
 	// nameStripped := "musicMonth"
 	fmt.Println(nameStripped)
 
+	fmt.Println("WRITING THE CONFIG:")
+
 	githubPage = "http://frigginglorious.github.io/" + nameStripped
 	output.WriteString("baseURL = \"" + githubPage + "/\"" + n)
 	output.WriteString("languageCode = \"en-us\"" + n)
 	output.WriteString("title = \"" + nameStripped + "\"" + n)
-	output.WriteString("theme = \"hyde-hyde\"" + n)
+	// output.WriteString("theme = \"hyde-hyde\"" + n)
+	// output.WriteString("theme = \"vncnt-hugo\"" + n)
+	output.WriteString("theme = \"import\"" + n)
+
 	output.WriteString("style = \"default\"" + n)
 	output.WriteString("[params]" + n + "authorimage = \"cover.jpg\"")
 
+	fmt.Println("WRITING to URL:" + githubPage)
+
 	configFile := filepath.Join(dir, "config.toml")
+	fmt.Println("WRITING THE CONFIG AS:" + configFile)
+
 	writeErr := ioutil.WriteFile(configFile, output.Bytes(), 0644)
 	check(writeErr)
 }
@@ -270,7 +323,7 @@ func getImg(f string, staticDir string) {
 	m, err := tag.ReadFrom(readFile)
 	check(err)
 	fmt.Println("ID3 Tag Title?:")
-	fmt.Println(m.Title())
+	fmt.Println(m.Title() + "\n")
 	fmt.Println(reflect.TypeOf(m.Picture().Data))
 
 	img, _, _ := image.Decode(bytes.NewReader(m.Picture().Data))
