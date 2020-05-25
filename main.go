@@ -62,15 +62,14 @@ func main() {
 	// pushDir := filepath.Dir(argsWithoutProg[0])
 	// dir := filepath.Dir(argsWithoutProg[1])
 
-	pushDir := filepath.Clean(argsWithoutProg[0])
-	dir := filepath.Clean(argsWithoutProg[1])
-
+	dir := filepath.Clean(argsWithoutProg[0])
+	pushDir := filepath.Clean(argsWithoutProg[1])
 	// pushDir := baseDir + argsWithoutProg[0]
 	// dir := baseDir + argsWithoutProg[1]
 
-	fmt.Println("FILEPATH SET AS: Push dir and Origin Dir:")
-	fmt.Println(pushDir)
+	fmt.Println("FILEPATH SET AS: Origin dir and Push Dir:")
 	fmt.Println(dir)
+	fmt.Println(pushDir)
 	// fmt.Println(arg)
 
 	// fixUtf := func(r rune) rune {
@@ -141,7 +140,10 @@ func main() {
 }
 
 func check(e error) {
+
 	if e != nil {
+		fmt.Println("CHECKED AND GOT ERROR")
+
 		panic(e)
 	}
 }
@@ -159,6 +161,17 @@ func getBaseSiteName(artistName string) string {
 func makeMd(f string, dir string, staticDir string) string {
 	fmt.Printf("MAKING MD from:" + f + "\n")
 	mp3File, err := id3.Open(f)
+
+	// These methods are for Title, Artist, Album, Year, Genre, and Comments.
+	lyricsFrame := mp3File.Frame("USLT")
+
+	lyrics := ""
+
+	if lyricsFrame != nil {
+		lyrics = lyricsFrame.String()
+	} else {
+	}
+
 	var mp3Title = mp3File.Title()
 	artistName = append(artistName, mp3File.Artist())
 	fmt.Printf("mp3Title: " + mp3Title + "\n")
@@ -227,7 +240,7 @@ func makeMd(f string, dir string, staticDir string) string {
 	output.WriteString(n)
 	output.WriteString("date: ")
 
-	output.WriteString(mp3YearStripped)
+	output.WriteString("\"" + mp3YearStripped + "-01-01\"")
 	output.WriteString(n)
 
 	output.WriteString("---")
@@ -242,6 +255,8 @@ func makeMd(f string, dir string, staticDir string) string {
 	output.WriteString("'  type='audio/mpeg'>")
 	output.WriteString(n)
 	output.WriteString("</audio>")
+	output.WriteString(n)
+	output.WriteString(lyrics)
 	output.WriteString(n)
 
 	fmt.Println(n + "md files are being saved to: " + mdPath)
@@ -300,17 +315,17 @@ func makeConfig(dir string) {
 	output.WriteString("baseURL = \"" + githubPage + "/\"" + n)
 	output.WriteString("languageCode = \"en-us\"" + n)
 	output.WriteString("title = \"" + nameStripped + "\"" + n)
-	// output.WriteString("theme = \"hyde-hyde\"" + n)
-	// output.WriteString("theme = \"vncnt-hugo\"" + n)
+
+	// Just import all themes as the name "import"
 	output.WriteString("theme = \"import\"" + n)
 
 	output.WriteString("style = \"default\"" + n)
-	output.WriteString("[params]" + n + "authorimage = \"cover.jpg\"")
-
+	output.WriteString("[params]" + n + "authorimage = \"cover.jpg\"" + n)
+	output.WriteString("dateformat = \"2006\"" + n)
 	fmt.Println("WRITING to URL:" + githubPage)
 
 	configFile := filepath.Join(dir, "config.toml")
-	fmt.Println("WRITING THE CONFIG AS:" + configFile)
+	fmt.Println("WRITING THE CONFIG TO:" + configFile)
 
 	writeErr := ioutil.WriteFile(configFile, output.Bytes(), 0644)
 	check(writeErr)
@@ -324,18 +339,30 @@ func getImg(f string, staticDir string) {
 	check(err)
 	fmt.Println("ID3 Tag Title?:")
 	fmt.Println(m.Title() + "\n")
-	fmt.Println(reflect.TypeOf(m.Picture().Data))
 
-	img, _, _ := image.Decode(bytes.NewReader(m.Picture().Data))
+	picture := m.Picture()
+	fmt.Println("Type of picture?:")
 
-	var opt jpeg.Options
+	fmt.Println(reflect.TypeOf(picture))
+	fmt.Println("Val of picture?:")
+	fmt.Println(picture)
 
-	opt.Quality = 80
-	// ok, write out the data into the new JPEG file
+	if picture != nil {
+		fmt.Println("SAVING PIC:")
+		img, _, _ := image.Decode(bytes.NewReader(picture.Data))
 
-	out, err := os.Create(staticDir + "/cover.jpg")
-	check(err)
-	err = jpeg.Encode(out, img, &opt)
+		var opt jpeg.Options
+
+		opt.Quality = 80
+		// ok, write out the data into the new JPEG file
+
+		out, err := os.Create(staticDir + "/cover.jpg")
+		check(err)
+		err = jpeg.Encode(out, img, &opt)
+	} else {
+		fmt.Println("NO PIC:")
+
+	}
 
 	log.Print(m.Format()) // The detected format.
 	log.Print(m.Title())  // The title of the track (see Metadata interface for more details).
