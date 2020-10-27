@@ -210,6 +210,8 @@ func makeMd(f string, dir string, staticDir string) string {
 	fmt.Printf("origFileName: " + origFileName + "\n")
 
 	mp3Source := "/" + getBaseSiteName(mp3File.Artist()) + "/" + origFileName
+	// mp3Source := "/" + origFileName
+
 	fmt.Printf("mp3Source: " + mp3Source + "\n")
 
 	// date := mp3YearStripped
@@ -311,8 +313,15 @@ func makeConfig(dir string) {
 
 	fmt.Println("WRITING THE CONFIG:")
 
-	githubPage = "http://frigginglorious.github.io/" + nameStripped
-	output.WriteString("baseURL = \"" + githubPage + "/\"" + n)
+	// githubPage = "http://frigginglorious.github.io/" + nameStripped
+	localPage := "http://localhost:1313/" + nameStripped
+
+	// output.WriteString("baseURL = \"" + githubPage + "/\"" + n)
+	// output.WriteString("baseURL = \"" + "http://localhost:1313" + "/\"" + n)
+	// output.WriteString("baseURL = \"" + "/\"" + n)
+
+	output.WriteString("baseURL = \"" + localPage + "/\"" + n)
+
 	output.WriteString("languageCode = \"en-us\"" + n)
 	output.WriteString("title = \"" + nameStripped + "\"" + n)
 
