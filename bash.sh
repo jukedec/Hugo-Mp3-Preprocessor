@@ -41,5 +41,5 @@ pwd
 # git clone https://github.com/MarcusVirg/forty themes/import
 git clone https://github.com/frigginglorious/hyde-hyde themes/import
 # cd ../
-hugo -D #create full site, then serve test
+hugo -D --noTimes #create full site, then serve test
 # hugo server -D --verbose
