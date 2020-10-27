@@ -17,14 +17,16 @@ echo "I'm starting in folder:"
 pwd
 echo "new site in $siteDir"
 
-scriptDir="$(dirname "$0")"
-cd $scriptDir
+# scriptDir="$(dirname "$0")"
+# cd $scriptDir
 echo "im in $scriptDir"
 echo "or in $0"
 pwd
 
 hugo new site $siteDir
-./main "$1" "$2" 
+
+OUTPUT=$(./main "$1" "$2")
+
 # siteDir = $1
 # siteDir = ${siteDir:3}
 
@@ -43,3 +45,4 @@ git clone https://github.com/frigginglorious/hyde-hyde themes/import
 # cd ../
 hugo -D --noTimes #create full site, then serve test
 # hugo server -D --verbose
+echo "${OUTPUT}"

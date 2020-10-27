@@ -104,7 +104,7 @@ func main() {
 
 	fmt.Println("Making directory: " + folderPath)
 	os.MkdirAll(folderPath, os.ModePerm)
-
+	artistName := ""
 	for _, file := range files {
 		fmt.Println(file)
 		fmt.Println(reflect.TypeOf(file).String())
@@ -118,7 +118,7 @@ func main() {
 			origFileSlice := strings.Split(file, "/")
 			origFileName := origFileSlice[len(origFileSlice)-1]
 			var staticDir = filepath.Join(folderPath, origFileName)
-			artistName := makeMd(file, pushDir, folderPath)
+			artistName = makeMd(file, pushDir, folderPath)
 			fmt.Println("SETTING TO ARTIST: " + artistName + "/n")
 
 			copy(file, staticDir)
@@ -136,7 +136,7 @@ func main() {
 	// ---
 
 	// Firsty
-
+	fmt.Println("theArtistName=" + getBaseSiteName(artistName))
 }
 
 func check(e error) {
