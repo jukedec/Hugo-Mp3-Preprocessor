@@ -6,15 +6,29 @@
 # ./bash.sh ~/Music/myBand ~/project/hugoStuff/sites/myBandSite
 # send hugo new site param to be the output for the 
 
+cd "$(dirname "$0")"
+
+
+
 siteDir=$2
 # siteDir=${siteDir:3}
 echo "I'm starting in folder:" 
 pwd
 echo "new site in $siteDir"
+
+scriptDir="$(dirname "$0")"
+cd $scriptDir
+echo "im in $scriptDir"
+echo "or in $0"
+pwd
+
 hugo new site $siteDir
 ./main "$1" "$2" 
 # siteDir = $1
 # siteDir = ${siteDir:3}
+
+
+
 
 cd $siteDir
 echo "I'm in folder:" 
