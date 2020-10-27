@@ -2,8 +2,9 @@
 
 # Parameter 1 is the source folder that mp3s are stored in, Parameter 2 is the folder you want the site created in
 # Example:
-# ./bash.sh ~/project/hugoStuff/sites/setlers ~/Music/Setlers\ -\ Katana\ EP
+
 # ./bash.sh ~/Music/myBand ~/project/hugoStuff/sites/myBandSite
+# ./bash.sh ~/Music/Setlers\ -\ Katana\ EP ~/project/hugoStuff/sites/setlers123
 # send hugo new site param to be the output for the 
 
 cd "$(dirname "$0")"
@@ -41,4 +42,4 @@ pwd
 git clone https://github.com/frigginglorious/hyde-hyde themes/import
 # cd ../
 hugo -D #create full site, then serve test
-hugo server -D --verbose
+# hugo server -D --verbose
