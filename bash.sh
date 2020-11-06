@@ -44,7 +44,9 @@ git clone https://github.com/frigginglorious/hyde-hyde themes/import
 # cd ../
 hugo -D --noTimes #create full site, then serve test
 
-LASTLINE=${str##*$'\n'}
+LASTLINE=${OUTPUT##*$'\n'}
+
+echo $LASTLINE
 
 mv -v public $LASTLINE
 mv -v $LASTLINE $3
