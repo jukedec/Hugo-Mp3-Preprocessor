@@ -11,7 +11,7 @@ cd "$(dirname "$0")"
 
 
 
-siteDir=$2
+siteDir=$2 + temp
 # siteDir=${siteDir:3}
 echo "I'm starting in folder:" 
 pwd
@@ -32,7 +32,7 @@ OUTPUT=$(./main "$1" "$2")
 
 
 
-
+mkdir $2
 cd $siteDir
 echo "I'm in folder:" 
 pwd
@@ -44,5 +44,8 @@ pwd
 git clone https://github.com/frigginglorious/hyde-hyde themes/import
 # cd ../
 hugo -D --noTimes #create full site, then serve test
+
+mv -v public/ ../$3/
+
 # hugo server -D --verbose
 echo "${OUTPUT}"
