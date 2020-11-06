@@ -317,7 +317,7 @@ func makeConfig(dir string) {
 
 	// githubPage = "http://frigginglorious.github.io/" + nameStripped
 	// localPage := "http://localhost:1313/" + nameStripped
-	localPage := "http://play.jukedec.org/" + nameStripped
+	localPage := "http://play.jukedec.com/" + nameStripped
 
 	// output.WriteString("baseURL = \"" + githubPage + "/\"" + n)
 	// output.WriteString("baseURL = \"" + "http://localhost:1313" + "/\"" + n)
