@@ -264,7 +264,7 @@ func makeMd(f string, dir string, staticDir string) string {
 	output.WriteString(n)
 
 	fmt.Println(n + "md files are being saved to: " + mdPath)
-	writeErr := ioutil.WriteFile(mdPath, output.Bytes(), 0644)
+	writeErr := ioutil.WriteFile(mdPath, output.Bytes(), 0777)
 	check(writeErr)
 
 	getImg(f, staticDir)
@@ -338,7 +338,7 @@ func makeConfig(dir string) {
 	configFile := filepath.Join(dir, "config.toml")
 	fmt.Println("WRITING THE CONFIG TO:" + configFile)
 
-	writeErr := ioutil.WriteFile(configFile, output.Bytes(), 0644)
+	writeErr := ioutil.WriteFile(configFile, output.Bytes(), 0777)
 	check(writeErr)
 }
 
