@@ -25,7 +25,7 @@ pwd
 
 hugo new site $siteDir
 
-OUTPUT=$(./main "$1" "$2" | tail -1)
+OUTPUT=$(./main "$1" "$2")
 
 # siteDir = $1
 # siteDir = ${siteDir:3}
@@ -44,8 +44,10 @@ git clone https://github.com/frigginglorious/hyde-hyde themes/import
 # cd ../
 hugo -D --noTimes #create full site, then serve test
 
-mv -v public $OUTPUT
-mv -v $OUTPUT $3
+LASTLINE=${str##*$'\n'}
+
+mv -v public $LASTLINE
+mv -v $LASTLINE $3
 
 echo 'SITE IS AT?:'
 echo $3
