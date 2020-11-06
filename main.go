@@ -316,7 +316,8 @@ func makeConfig(dir string) {
 	fmt.Println("WRITING THE CONFIG:")
 
 	// githubPage = "http://frigginglorious.github.io/" + nameStripped
-	localPage := "http://localhost:1313/" + nameStripped
+	// localPage := "http://localhost:1313/" + nameStripped
+	localPage := "http://play.jukedec.org/" + nameStripped
 
 	// output.WriteString("baseURL = \"" + githubPage + "/\"" + n)
 	// output.WriteString("baseURL = \"" + "http://localhost:1313" + "/\"" + n)
@@ -333,7 +334,14 @@ func makeConfig(dir string) {
 	output.WriteString("style = \"default\"" + n)
 	output.WriteString("[params]" + n + "authorimage = \"cover.jpg\"" + n)
 	output.WriteString("dateformat = \"2006\"" + n)
-	fmt.Println("WRITING to URL:" + githubPage)
+
+	// [markup.goldmark.renderer]
+	// unsafe = true
+
+	output.WriteString("[markup.goldmark.renderer]" + n)
+	output.WriteString("unsafe = true" + n)
+
+	fmt.Println("WRITING to URL:" + localPage)
 
 	configFile := filepath.Join(dir, "config.toml")
 	fmt.Println("WRITING THE CONFIG TO:" + configFile)
