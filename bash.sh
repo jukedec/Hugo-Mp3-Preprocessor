@@ -45,13 +45,10 @@ git clone https://github.com/frigginglorious/hyde-hyde themes/import
 # cd ../
 hugo -D --noTimes #create full site, then serve test
 
-FINAL = $3 + '/'
-
-
-mv -v public/ $FINAL
+mv -v public $3
 
 # hugo server -D --verbose
 echo "${OUTPUT}"
 
 echo 'SITE IS AT?:'
-echo $FINAL
+echo $3
