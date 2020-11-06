@@ -45,7 +45,8 @@ git clone https://github.com/frigginglorious/hyde-hyde themes/import
 # cd ../
 hugo -D --noTimes #create full site, then serve test
 
-mv -v public $3
+mv -v public $4
+mv -v $4 $3
 
 # hugo server -D --verbose
 echo "${OUTPUT}"
