@@ -11,7 +11,7 @@ cd "$(dirname "$0")"
 
 
 
-siteDir=$2 + temp
+siteDir=$2
 # siteDir=${siteDir:3}
 echo "I'm starting in folder:" 
 pwd
