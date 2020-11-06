@@ -25,11 +25,10 @@ pwd
 
 hugo new site $siteDir
 
-OUTPUT=$(./main "$1" "$2")
+OUTPUT=$(./main "$1" "$2" | tail -1)
 
 # siteDir = $1
 # siteDir = ${siteDir:3}
-
 
 
 mkdir $3
@@ -45,11 +44,11 @@ git clone https://github.com/frigginglorious/hyde-hyde themes/import
 # cd ../
 hugo -D --noTimes #create full site, then serve test
 
-mv -v public $4
-mv -v $4 $3
-
-# hugo server -D --verbose
-echo "${OUTPUT}"
+mv -v public $OUTPUT
+mv -v $OUTPUT $3
 
 echo 'SITE IS AT?:'
 echo $3
+
+# hugo server -D --verbose
+echo "${OUTPUT}"

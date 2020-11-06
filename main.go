@@ -137,6 +137,8 @@ func main() {
 
 	// Firsty
 	fmt.Println("theArtistName=" + getBaseSiteName(artistName))
+	fmt.Println(getBaseSiteName(artistName))
+
 }
 
 func check(e error) {
