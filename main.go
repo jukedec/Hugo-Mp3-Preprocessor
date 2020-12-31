@@ -64,6 +64,12 @@ func main() {
 
 	dir := filepath.Clean(argsWithoutProg[0])
 	pushDir := filepath.Clean(argsWithoutProg[1])
+	baseURL := argsWithoutProg[2]
+
+	fmt.Println("baseURL:")
+	fmt.Println(baseURL)
+
+
 	// pushDir := baseDir + argsWithoutProg[0]
 	// dir := baseDir + argsWithoutProg[1]
 
@@ -123,7 +129,7 @@ func main() {
 
 			copy(file, staticDir)
 
-			makeConfig(pushDir)
+			makeConfig(pushDir, baseURL)
 		}
 	}
 
@@ -300,7 +306,7 @@ func copy(src, dst string) (int64, error) {
 	return nBytes, err
 }
 
-func makeConfig(dir string) {
+func makeConfig(dir string, baseURL string) {
 	var output bytes.Buffer
 
 	//Remove because I haven't figured out solid deploy yet.
@@ -317,7 +323,11 @@ func makeConfig(dir string) {
 
 	// githubPage = "http://frigginglorious.github.io/" + nameStripped
 	// localPage := "http://localhost:1313/" + nameStripped
-	localPage := "http://play.jukedec.com/" + nameStripped
+	// localPage := "http://play.jukedec.com/" + nameStripped
+
+	localPage := baseURL + "/" + nameStripped
+
+
 
 	// output.WriteString("baseURL = \"" + githubPage + "/\"" + n)
 	// output.WriteString("baseURL = \"" + "http://localhost:1313" + "/\"" + n)
