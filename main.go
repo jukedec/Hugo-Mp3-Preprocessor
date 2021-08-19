@@ -171,14 +171,17 @@ func makeMd(f string, dir string, staticDir string) string {
 	mp3File, err := id3.Open(f)
 
 	// These methods are for Title, Artist, Album, Year, Genre, and Comments.
-	lyricsFrame := mp3File.Frame("USLT")
 
-	lyrics := ""
 
-	if lyricsFrame != nil {
-		lyrics = lyricsFrame.String()
-	} else {
-	}
+
+	// Take care of lyrics somewhere else I spose?
+	// lyricsFrame := mp3File.Frame("USLT")
+
+	// if lyricsFrame != nil {
+
+	// 	lyrics := lyricsFrame.String()
+	// } else {
+	// }
 
 	var mp3Title = mp3File.Title()
 	artistName = append(artistName, mp3File.Artist())
@@ -266,7 +269,8 @@ func makeMd(f string, dir string, staticDir string) string {
 	output.WriteString(n)
 	output.WriteString("</audio>")
 	output.WriteString(n)
-	output.WriteString(lyrics)
+	// output.WriteString(lyrics)
+	
 	output.WriteString(n)
 
 	fmt.Println(n + "md files are being saved to: " + mdPath)

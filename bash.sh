@@ -1,10 +1,9 @@
 #!/bin/bash
 
-# Parameter 1 is the source folder that mp3s are stored in, Parameter 2 is the folder you want the site created in
-# Example:
+# Parameter 1 is the source folder that mp3s are stored in, Parameter 2 is the temporry folder where site is initially set up. Paramter 3 is the output directory of finished site.
 
-# ./bash.sh ~/Music/myBand ~/project/hugoStuff/sites/myBandSite
-# ./bash.sh ~/Music/Setlers\ -\ Katana\ EP ~/project/hugoStuff/sites/setlers123
+
+# /Users/frigginglorious/code/Hugo-Mp3-Pre/bash.sh /Users/frigginglorious/project/testMusic/Jeff\ Rosenstock\ -\ 2020\ DUMP /Users/frigginglorious/project/sites/temp/brickHouse /Users/frigginglorious/project/sites/brickHouse
 # send hugo new site param to be the output for the 
 
 cd "$(dirname "$0")"
@@ -19,13 +18,12 @@ echo "new site in $siteDir"
 
 # scriptDir="$(dirname "$0")"
 # cd $scriptDir
-echo "im in $scriptDir"
-echo "or in $0"
+echo "Script location is $0 in folder:"
 pwd
 
 hugo new site $siteDir
 
-OUTPUT=$(./main "$1" "$2")
+OUTPUT=$(./main "$1" "$2" "$4")
 
 # siteDir = $1
 # siteDir = ${siteDir:3}
