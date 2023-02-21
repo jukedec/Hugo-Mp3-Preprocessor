@@ -6,9 +6,12 @@
 # /Users/frigginglorious/code/Hugo-Mp3-Pre/bash.sh /Users/frigginglorious/project/testMusic/Jeff\ Rosenstock\ -\ 2020\ DUMP /Users/frigginglorious/project/sites/temp/brickHouse /Users/frigginglorious/project/sites/brickHouse
 # send hugo new site param to be the output for the 
 
-cd "$(dirname "$0")"
+# cd "$(dirname "$0")"
 
+try() { "$@" || die "cannot $*"; }
 
+runDir="$(dirname "$0")"
+cd runDir
 
 siteDir=$2
 # siteDir=${siteDir:3}
@@ -23,7 +26,8 @@ pwd
 
 hugo new site $siteDir
 
-OUTPUT=$(./main "$1" "$2" "$4")
+OUTPUT=$($runDir/main "$1" "$2" "$4")
+# OUTPUT=$($0/..//main "$1" "$2" "$4")
 
 # siteDir = $1
 # siteDir = ${siteDir:3}
